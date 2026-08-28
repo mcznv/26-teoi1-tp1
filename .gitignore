@@ -1,0 +1,71 @@
+# ====================================================================
+# ARCHIVOS GENERADOS POR COMPILACIÓN (MAVEN / JAVA)
+# ====================================================================
+# Excluye la carpeta de salida de Maven donde se compila todo el proyecto
+target/
+*.class
+*.war
+*.ear
+*.nar
+*.car
+*.jack
+*.jpi
+
+# Archivos de bitácora y volcados de memoria
+*.log
+*.dump
+*.crash
+
+# ====================================================================
+# CÓDIGO GENERADO AUTOMÁTICAMENTE (JFLEX / CUP)
+# ====================================================================
+# Evita subir los archivos .java que JFlex y CUP generan en cada compilación
+# Nota: Modifica el paquete de destino si tus clases generadas usan rutas específicas.
+src/main/java/**/*Lexer.java
+src/main/java/**/*sym.java
+src/main/java/**/*parser.java
+
+# ====================================================================
+# CONFIGURACIÓN DE ENTORNOS DE DESARROLLO (IDEs)
+# ====================================================================
+
+# IntelliJ IDEA
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+
+# Eclipse
+.metadata/
+.classpath
+.project
+.settings/
+*.launch
+.factorypath
+
+# Visual Studio Code
+.vscode/
+
+# NetBeans
+nbproject/private/
+build/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+
+# ====================================================================
+# SISTEMA OPERATIVO Y HERRAMIENTAS DEL SISTEMA
+# ====================================================================
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# ====================================================================
+# ENTORNO DE EJECUCIÓN (JAVA 25+)
+# ====================================================================
+# Archivos específicos de la máquina virtual o configuraciones de depuración remota
+.attach_pid*
+hs_err_pid*
+replay_pid*

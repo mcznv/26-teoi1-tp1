@@ -1,0 +1,59 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>ar.edu.unlu.teoi1</groupId>
+	<artifactId>tp1</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<properties>
+		<maven.compiler.source>25</maven.compiler.source>
+		<maven.compiler.target>25</maven.compiler.target>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>de.jflex</groupId>
+			<artifactId>jflex</artifactId>
+			<version>1.9.1</version>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<!-- Plugin de Compilación configurado para Java 25 -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.13.0</version>
+				<configuration>
+					<source>25</source>
+					<target>25</target>
+				</configuration>
+			</plugin>
+
+			<!-- Plugin de JFlex para compilar .jflex automáticamente -->
+			<plugin>
+				<groupId>de.jflex</groupId>
+				<artifactId>jflex-maven-plugin</artifactId>
+				<version>1.9.1</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+						<configuration>
+							<lexDefinitions>
+								<lexDefinition>src/main/jflex</lexDefinition>
+							</lexDefinitions>
+							
+							<outputDirectory>src/main/java</outputDirectory>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+
+		</plugins>
+	</build>
+</project>
