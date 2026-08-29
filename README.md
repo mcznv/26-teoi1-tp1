@@ -16,6 +16,8 @@
 
 <img src="./imagenes/imagen1.excalidraw.png" alt="imagen1" width="400" height="300">
 
+### [Scrapbook imagenes de editores de referencia](./Scrapbook.md)
+
 ###  Comandos utiles para construir el proyecto
 
 #### Construir el proyecto
