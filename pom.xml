@@ -46,13 +46,13 @@
 							<lexDefinitions>
 								<lexDefinition>src/main/jflex</lexDefinition>
 							</lexDefinitions>
-							
+
 							<outputDirectory>src/main/java</outputDirectory>
 						</configuration>
 					</execution>
 				</executions>
 			</plugin>
-<plugin>
+			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-shade-plugin</artifactId>
 				<version>3.5.1</version>
@@ -64,12 +64,14 @@
 						</goals>
 						<configuration>
 							<transformers>
-								<transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+								<transformer
+									implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
 									<!-- Ruta exacta a tu método main -->
 									<mainClass>tp1.IDECompilador</mainClass>
 								</transformer>
 							</transformers>
-							<!-- Evita errores de firma de seguridad con dependencias externas -->
+							<!-- Evita errores de firma de seguridad con
+							dependencias externas -->
 							<filters>
 								<filter>
 									<artifact>*:*</artifact>
