@@ -6,8 +6,8 @@
 	<artifactId>tp1</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<properties>
-		<maven.compiler.source>25</maven.compiler.source>
-		<maven.compiler.target>25</maven.compiler.target>
+		<maven.compiler.source>17</maven.compiler.source>
+		<maven.compiler.target>17</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
@@ -21,18 +21,17 @@
 
 	<build>
 		<plugins>
-			<!-- Plugin de Compilación configurado para Java 25 -->
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.13.0</version>
 				<configuration>
-					<source>25</source>
-					<target>25</target>
+					<source>17</source>
+					<target>17</target>
 				</configuration>
 			</plugin>
 
-			<!-- Plugin de JFlex para compilar .jflex automáticamente -->
 			<plugin>
 				<groupId>de.jflex</groupId>
 				<artifactId>jflex-maven-plugin</artifactId>
@@ -66,12 +65,10 @@
 							<transformers>
 								<transformer
 									implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-									<!-- Ruta exacta a tu método main -->
 									<mainClass>tp1.IDECompilador</mainClass>
 								</transformer>
 							</transformers>
-							<!-- Evita errores de firma de seguridad con
-							dependencias externas -->
+
 							<filters>
 								<filter>
 									<artifact>*:*</artifact>

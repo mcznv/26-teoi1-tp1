@@ -1,0 +1,39 @@
+//*
+  Archivo de prueba general Grupo 6
+  Prueba de variables, tipos de datos, ciclos, if y setswitch
+*//
+
+DECLARE.SECTION
+    [a, b, c, texto] ::= [INT, FLOAT, INT, STRING]
+ENDDECLARE.SECTION
+
+PROGRAM.SECTION
+    //* Asignaciones simples y tipos de datos *//
+    a ::= 5 + 10
+    b ::= 3.14 * 2.0
+    texto ::= "Hola Compilador"
+
+    //* Ciclo WHILE y Decisiones IF *//
+    WHILE (a < 20)
+        a ::= a + 1
+    ENDWHILE
+
+    IF (b >= 5.0) AND (a == 20)
+        write "Fin del ciclo"
+    ENDIF
+
+    //* Prueba del Tema Especial: SETSWITCH *//
+    SETSWITCH (a + c * 2)
+    CASE 10:
+        c ::= 200
+        a ::= 100
+    CASE 22:
+        c ::= a + b
+    CASE 30:
+        c ::= a
+    ELSECASE:
+        a ::= 0
+    ENDSETCASE
+
+    write texto
+ENDPROGRAM.SECTION

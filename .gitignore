@@ -11,19 +11,12 @@ target/
 *.jack
 *.jpi
 
+!target/*.jar
+
 # Archivos de bitácora y volcados de memoria
 *.log
 *.dump
 *.crash
-
-# ====================================================================
-# CÓDIGO GENERADO AUTOMÁTICAMENTE (JFLEX / CUP)
-# ====================================================================
-# Evita subir los archivos .java que JFlex y CUP generan en cada compilación
-# Nota: Modifica el paquete de destino si tus clases generadas usan rutas específicas.
-src/main/java/**/*Lexer.java
-src/main/java/**/*sym.java
-src/main/java/**/*parser.java
 
 # ====================================================================
 # CONFIGURACIÓN DE ENTORNOS DE DESARROLLO (IDEs)
