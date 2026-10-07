@@ -27,7 +27,7 @@ Este comando le indica a Maven que genere la clase `Lexico.java` utilizando JFle
 ```bash
 mvn clean package
 
-java -jar ./target/tp1-0.0.1-SNAPSHOT-shaded.jar
+java -jar ./target/tp1-0.0.1-SNAPSHOT.jar
 ```
 ###  Instrucciones de Uso
 Ejecutar la aplicación con el comando mencionado arriba.
