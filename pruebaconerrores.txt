@@ -1,0 +1,24 @@
+//*
+  Archivo de validación de errores léxicos y rangos.
+  El compilador debería detenerse al encontrar el primer error y no generar el ts.txt.
+*//
+
+DECLARE.SECTION
+    [a, b, texto] ::= [INT, FLOAT, STRING]
+ENDDECLARE.SECTION
+
+PROGRAM.SECTION
+
+    //* ERROR 1: String que supera los 30 caracteres alfanuméricos *//
+    texto ::= "Este es un string ridículamente largo que debe fallar"
+
+    //* ERROR 2: Constante entera fuera del límite de 16 bits (mayor a 32767) *//
+    a ::= 999999
+
+    //* ERROR 3: Constante real fuera del límite de 32 bits *//
+    b ::= 3.4e39
+
+    //* ERROR 4: Caracter no reconocido (Ejemplo: arroba suelta) *//
+    a ::= b + @
+
+ENDPROGRAM.SECTION
