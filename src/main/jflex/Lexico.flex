@@ -98,18 +98,36 @@ CONST_STRING = \"({CARACTERSTRING}|\\.)*\"
                      }
 
 {CONST_INT}          {
-                        ts.agregar(yytext(), "CTE_E", yytext(), 0);
-                        return "TOKEN: CONST_INT, VALOR: " + yytext();
+                        try {
+                            int valor = Integer.parseInt(yytext());
+                            if (valor > 32767) { // Límite de 16 bits con signo
+                                return "ERROR LÉXICO en línea " + (yyline+1) + ": Entero fuera de rango (16 bits) -> " + yytext();
+                            }
+                            ts.agregar(yytext(), "CTE_E", yytext(), 0);
+                            return "TOKEN: CONST_INT, VALOR: " + yytext();
+                        } catch (Exception e) {
+                            return "ERROR LÉXICO en línea " + (yyline+1) + ": Entero demasiado grande -> " + yytext();
+                        }
                      }
 
 {CONST_REAL}         {
-                        ts.agregar(yytext(), "CTE_F", yytext(), 0);
-                        return "TOKEN: CONST_REAL, VALOR: " + yytext();
+                        try {
+                            float valor = Float.parseFloat(yytext());
+                            if (Float.isInfinite(valor)) { // Límite de 32 bits
+                                return "ERROR LÉXICO en línea " + (yyline+1) + ": Real fuera de rango (32 bits) -> " + yytext();
+                            }
+                            ts.agregar(yytext(), "CTE_F", yytext(), 0);
+                            return "TOKEN: CONST_REAL, VALOR: " + yytext();
+                        } catch (Exception e) {
+                            return "ERROR LÉXICO en línea " + (yyline+1) + ": Real fuera de rango -> " + yytext();
+                        }
                      }
 
 {CONST_STRING}       {
-                        // Calculamos el valor y la longitud sin incluir las comillas para la Tabla de Símbolos
                         String valorReal = yytext().replace("\"", "");
+                        if (valorReal.length() > 30) { // Límite de 30 caracteres
+                            return "ERROR LÉXICO en línea " + (yyline+1) + ": String supera los 30 caracteres (" + valorReal.length() + ") -> " + yytext();
+                        }
                         ts.agregar(yytext(), "CTE_STR", valorReal, valorReal.length());
                         return "TOKEN: CONST_STRING, VALOR: " + yytext();
                      }

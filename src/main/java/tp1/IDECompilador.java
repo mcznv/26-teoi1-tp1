@@ -114,16 +114,31 @@ public class IDECompilador extends JFrame {
         try {
             Lexico lexer = new Lexico(new StringReader(codigo));
             String token;
+            boolean hayError = false;
 
             while ((token = lexer.yylex()) != null) {
                 txtOutput.append(token + "\n");
+
+                // Si el token es un error, frenamos la lectura y salimos del bucle
+                if (token.startsWith("ERROR LÉXICO")) {
+                    hayError = true;
+                    break;
+                }
             }
 
+
+            // Si hubo error guardaraa solo lo recolectado hasta el momento del 'break'
             lexer.ts.guardarEnArchivo("ts.txt");
-            txtOutput.append("\nAnálisis léxico finalizado. Tabla generada en 'ts.txt'.\n");
+
+            // Verificamos el estado
+            if (hayError) {
+                txtOutput.append("\n[!] ANÁLISIS ABORTADO POR ERRORES. Se generó 'ts.txt' parcialmente con los símbolos válidos previos al error.\n");
+            } else {
+                txtOutput.append("\nAnálisis léxico finalizado con éxito. Tabla generada completa en 'ts.txt'.\n");
+            }
 
         } catch (Exception ex) {
-            txtOutput.append("Error en el análisis: " + ex.getMessage() + "\n");
+            txtOutput.append("Error fatal en el análisis: " + ex.getMessage() + "\n");
         }
     }
 
