@@ -62,3 +62,6 @@ Desktop.ini
 .attach_pid*
 hs_err_pid*
 replay_pid*
+Backlog.md
+ts.txt
+src/main/java/tp1/Lexico.java
