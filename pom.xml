@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>ar.edu.unlu.teoi1</groupId>
 	<artifactId>tp1</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.2-SNAPSHOT</version>
 	<properties>
 		<maven.compiler.source>17</maven.compiler.source>
 		<maven.compiler.target>17</maven.compiler.target>
@@ -16,6 +16,11 @@
 			<groupId>de.jflex</groupId>
 			<artifactId>jflex</artifactId>
 			<version>1.9.1</version>
+		</dependency>
+		<dependency>
+  			<groupId>com.github.vbmacher</groupId>
+  			<artifactId>java-cup-runtime</artifactId>
+  		<version>11b-20160615-3</version>
 		</dependency>
 	</dependencies>
 
@@ -51,6 +56,26 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+                <groupId>com.github.vbmacher</groupId>
+  				<artifactId>cup-maven-plugin</artifactId>
+  				<version>11b-20160615-3</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <cupDefinition>src/main/cup/Asintactico.cup</cupDefinition>
+                            <outputDirectory>src/main/java</outputDirectory>
+                            <className>AnalizadorSintactico</className>
+                            <symbolsName>SimboloCup</symbolsName>
+							<packageName>tp1</packageName>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-shade-plugin</artifactId>

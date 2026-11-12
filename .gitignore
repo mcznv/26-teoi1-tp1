@@ -2,6 +2,7 @@
 # ARCHIVOS GENERADOS POR COMPILACIÓN (MAVEN / JAVA)
 # ====================================================================
 # Excluye la carpeta de salida de Maven donde se compila todo el proyecto
+jars/
 target/
 *.class
 *.war

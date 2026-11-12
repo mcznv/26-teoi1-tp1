@@ -1,0 +1,164 @@
+package tp1;
+
+import java_cup.runtime.*;
+
+/* --- TERMINALES (Tokens suministrados por el analizador léxico) --- */
+terminal DECLARE_SECTION, ENDDECLARE_SECTION, PROGRAM_SECTION, ENDPROGRAM_SECTION;
+terminal FLOAT, INT, STRING;
+terminal WHILE, ENDWHILE, IF, ELSE, ENDIF;
+terminal WRITE;
+terminal SETSWITCH, CASE, ELSECASE, ENDSETCASE;
+terminal OP_AND, OP_OR;
+terminal ASIGNACION, OP_SUMA, OP_RESTA, OP_MULT, OP_DIV, OP_RESTO;
+terminal OP_MENOR, OP_MENOR_IGUAL, OP_MAYOR, OP_MAYOR_IGUAL, OP_IGUAL, OP_DISTINTO;
+terminal COR_A, COR_C, PAR_A, PAR_C, COMA, DOS_PUNTOS;
+terminal String ID;
+terminal String CONST_INT;
+terminal String CONST_REAL;
+terminal String CONST_STRING;
+
+/* --- NO TERMINALES --- */
+non terminal programa, seccion_declaracion, seccion_programa;
+non terminal lista_declaraciones, declaracion, lista_variables, tipo_dato;
+non terminal lista_sentencias, sentencia;
+non terminal asignacion, condicional, bucle, salida_io, estructura_switch;
+non terminal lista_casos, caso, caso_defecto;
+non terminal expresion, termino, factor, expresion_logica, condicion;
+
+/* --- PRECEDENCIA --- */
+precedence left OP_OR;
+precedence left OP_AND;
+precedence left OP_IGUAL, OP_DISTINTO, OP_MENOR, OP_MENOR_IGUAL, OP_MAYOR, OP_MAYOR_IGUAL;
+precedence left OP_SUMA, OP_RESTA;
+precedence left OP_MULT, OP_DIV, OP_RESTO;
+
+/* --- REGLAS GRAMATICALES --- */
+start with programa;
+
+programa ::=
+    seccion_declaracion seccion_programa
+    ;
+
+/* --- Sección de Declaraciones --- */
+seccion_declaracion ::=
+    DECLARE_SECTION lista_declaraciones ENDDECLARE_SECTION
+    | /* vacío si permites programas sin variables */
+    ;
+
+lista_declaraciones ::=
+    lista_declaraciones declaracion
+    | declaracion
+    ;
+
+declaracion ::=
+    tipo_dato DOS_PUNTOS lista_variables
+    ;
+
+lista_variables ::=
+    lista_variables COMA ID
+    | ID
+    ;
+
+tipo_dato ::=
+    INT
+    | FLOAT
+    | STRING
+    ;
+
+/* --- Sección del Programa Principal --- */
+seccion_programa ::=
+    PROGRAM_SECTION lista_sentencias ENDPROGRAM_SECTION
+    ;
+
+lista_sentencias ::=
+    lista_sentencias sentencia
+    | sentencia
+    ;
+
+sentencia ::=
+    asignacion
+    | condicional
+    | bucle
+    | salida_io
+    | estructura_switch
+    ;
+
+/* Sentencia de Asignación */
+asignacion ::=
+    ID ASIGNACION expresion
+    ;
+
+/* Estructura de Control IF */
+condicional ::=
+    IF PAR_A expresion_logica PAR_C lista_sentencias ENDIF
+    | IF PAR_A expresion_logica PAR_C lista_sentencias ELSE lista_sentencias ENDIF
+    ;
+
+/* Estructura de Control WHILE */
+bucle ::=
+    WHILE PAR_A expresion_logica PAR_C lista_sentencias ENDWHILE
+    ;
+
+/* Impresión por pantalla */
+salida_io ::=
+    WRITE PAR_A expresion PAR_C
+    ;
+
+/* Tema Especial Grupo 6: SETSWITCH */
+estructura_switch ::=
+    SETSWITCH PAR_A ID PAR_C lista_casos caso_defecto ENDSETCASE
+    | SETSWITCH PAR_A ID PAR_C lista_casos ENDSETCASE
+    ;
+
+lista_casos ::=
+    lista_casos caso
+    | caso
+    ;
+
+caso ::=
+    CASE CONST_INT DOS_PUNTOS lista_sentencias
+    | CASE CONST_STRING DOS_PUNTOS lista_sentencias
+    ;
+
+caso_defecto ::=
+    ELSECASE DOS_PUNTOS lista_sentencias
+    ;
+
+/* --- Expresiones Lógicas --- */
+expresion_logica ::=
+    expresion_logica OP_AND condicion
+    | expresion_logica OP_OR condicion
+    | condicion
+    ;
+
+condicion ::=
+    expresion OP_MENOR expresion
+    | expresion OP_MENOR_IGUAL expresion
+    | expresion OP_MAYOR expresion
+    | expresion OP_MAYOR_IGUAL expresion
+    | expresion OP_IGUAL expresion
+    | expresion OP_DISTINTO expresion
+    | PAR_A expresion_logica PAR_C
+    ;
+
+/* --- Expresiones Aritméticas --- */
+expresion ::=
+    expresion OP_SUMA termino
+    | expresion OP_RESTA termino
+    | termino
+    ;
+
+termino ::=
+    termino OP_MULT factor
+    | termino OP_DIV factor
+    | termino OP_RESTO factor
+    | factor
+    ;
+
+factor ::=
+    ID
+    | CONST_INT
+    | CONST_REAL
+    | CONST_STRING
+    | PAR_A expresion PAR_C
+    ;
