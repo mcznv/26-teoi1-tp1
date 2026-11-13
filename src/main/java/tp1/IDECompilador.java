@@ -77,9 +77,9 @@ public class IDECompilador extends JFrame {
             txtOutput.setText("");
         });
 
-        JButton btnCompilar = new JButton("Compilar (Análisis Léxico)");
+        JButton btnCompilar = new JButton("Compilar");
         btnCompilar.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        btnCompilar.addActionListener(e -> compilarLexico());
+        btnCompilar.addActionListener(e -> compilar());
 
         panelBotones.add(btnLimpiar);
         panelBotones.add(btnCompilar);
@@ -102,8 +102,8 @@ public class IDECompilador extends JFrame {
         }
     }
 
-    private void compilarLexico() {
-        txtOutput.setText("Iniciando análisis léxico...\n");
+    private void compilar() {
+        txtOutput.setText("Iniciando compilación...\n");
         String codigo = txtInput.getText();
 
         if (codigo.trim().isEmpty()) {
@@ -113,32 +113,37 @@ public class IDECompilador extends JFrame {
 
         try {
             Lexico lexer = new Lexico(new StringReader(codigo));
-            String token;
-            boolean hayError = false;
+            AnalizadorSintactico sintactico = new AnalizadorSintactico(lexer);
+            // Se comparte la tabla de símbolos
+            sintactico.ts = lexer.ts;
+            sintactico.parse();
+            boolean hayErrores = false;
 
-            while ((token = lexer.yylex()) != null) {
-                txtOutput.append(token + "\n");
-
-                // Si el token es un error, frenamos la lectura y salimos del bucle
-                if (token.startsWith("ERROR LÉXICO")) {
-                    hayError = true;
-                    break;
+            if (!lexer.erroresLexicos.isEmpty()) {
+                hayErrores = true;
+                for (String err : lexer.erroresLexicos) {
+                    txtOutput.append(err + "\n");
                 }
             }
 
-
-            // Si hubo error guardaraa solo lo recolectado hasta el momento del 'break'
+            if (!sintactico.erroresSintacticos.isEmpty()) {
+                hayErrores = true;
+                for (String err : sintactico.erroresSintacticos) {
+                    txtOutput.append(err + "\n");
+                }
+            }
             lexer.ts.guardarEnArchivo("ts.txt");
 
-            // Verificamos el estado
-            if (hayError) {
-                txtOutput.append("\n[!] ANÁLISIS ABORTADO POR ERRORES. Se generó 'ts.txt' parcialmente con los símbolos válidos previos al error.\n");
+
+            if (hayErrores) {
+                txtOutput.append("\n[!] COMPILACIÓN FINALIZADA CON ERRORES. Revise los mensajes anteriores.\n");
             } else {
-                txtOutput.append("\nAnálisis léxico finalizado con éxito. Tabla generada completa en 'ts.txt'.\n");
+                txtOutput.append("\n[OK] Compilación exitosa. Sintaxis correcta y Tabla de Símbolos generada en 'ts.txt'.\n");
             }
 
         } catch (Exception ex) {
-            txtOutput.append("Error fatal en el análisis: " + ex.getMessage() + "\n");
+            txtOutput.append("Error fatal durante la compilación: " + ex.getMessage() + "\n");
+            ex.printStackTrace();
         }
     }
 

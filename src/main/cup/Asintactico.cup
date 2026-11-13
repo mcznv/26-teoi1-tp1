@@ -1,6 +1,51 @@
 package tp1;
 
 import java_cup.runtime.*;
+import java.util.ArrayList;
+import java.util.List;
+
+parser code {:
+    // Referencia compartida a la Tabla de Símbolos del Léxico
+    public TablaSimbolos ts = new TablaSimbolos();
+
+    // Lista errores sintácticos y semánticos
+    public List<String> erroresSintacticos = new ArrayList<>();
+
+    // Listas auxiliares para emparejar [variables] ::= [tipos]
+    // si lo hacemos solo con la gramática mezclamos los tipos y variables
+    ArrayList<String> tempVariables = new ArrayList<>();
+    ArrayList<String> tempTipos = new ArrayList<>();
+
+    // Sobreescribimos manejo de errores de CUP
+    @Override
+    public void syntax_error(Symbol s) {
+        String lexema = (s.value != null) ? s.value.toString() : "fin de archivo o símbolo";
+        String error = "ERROR SINTÁCTICO en línea " + s.left + ", columna " + s.right +
+                       ": Token inesperado '" + lexema + "'.";
+        erroresSintacticos.add(error);
+        System.err.println(error);
+    }
+
+    @Override
+    public void unrecovered_syntax_error(Symbol s) throws java.lang.Exception {
+        String error = "ERROR SINTÁCTICO FATAL en línea " + s.left + ": No se pudo continuar con el análisis.";
+        erroresSintacticos.add(error);
+    }
+
+    // Método auxiliar para registrar errores semánticos (ej. desajuste de tipos o cantidades)
+    private void registrarErrorSemantico(int linea, String mensaje) {
+        String error = "ERROR SEMÁNTICO en línea " + linea + ": " + mensaje;
+        erroresSintacticos.add(error);
+        System.err.println(error);
+    }
+
+
+
+
+
+    :};
+
+
 
 /* --- TERMINALES (Tokens suministrados por el analizador léxico) --- */
 terminal DECLARE_SECTION, ENDDECLARE_SECTION, PROGRAM_SECTION, ENDPROGRAM_SECTION;
@@ -9,7 +54,8 @@ terminal WHILE, ENDWHILE, IF, ELSE, ENDIF;
 terminal WRITE;
 terminal SETSWITCH, CASE, ELSECASE, ENDSETCASE;
 terminal OP_AND, OP_OR;
-terminal ASIGNACION, OP_SUMA, OP_RESTA, OP_MULT, OP_DIV, OP_RESTO;
+terminal ASIGNACION; // El lexema ::=
+terminal OP_SUMA, OP_RESTA, OP_MULT, OP_DIV;
 terminal OP_MENOR, OP_MENOR_IGUAL, OP_MAYOR, OP_MAYOR_IGUAL, OP_IGUAL, OP_DISTINTO;
 terminal COR_A, COR_C, PAR_A, PAR_C, COMA, DOS_PUNTOS;
 terminal String ID;
@@ -19,18 +65,20 @@ terminal String CONST_STRING;
 
 /* --- NO TERMINALES --- */
 non terminal programa, seccion_declaracion, seccion_programa;
-non terminal lista_declaraciones, declaracion, lista_variables, tipo_dato;
+non terminal lista_declaraciones, declaracion, lista_variables, lista_tipos;
+non terminal String tipo_dato;
 non terminal lista_sentencias, sentencia;
 non terminal asignacion, condicional, bucle, salida_io, estructura_switch;
 non terminal lista_casos, caso, caso_defecto;
 non terminal expresion, termino, factor, expresion_logica, condicion;
+
 
 /* --- PRECEDENCIA --- */
 precedence left OP_OR;
 precedence left OP_AND;
 precedence left OP_IGUAL, OP_DISTINTO, OP_MENOR, OP_MENOR_IGUAL, OP_MAYOR, OP_MAYOR_IGUAL;
 precedence left OP_SUMA, OP_RESTA;
-precedence left OP_MULT, OP_DIV, OP_RESTO;
+precedence left OP_MULT, OP_DIV;
 
 /* --- REGLAS GRAMATICALES --- */
 start with programa;
@@ -42,7 +90,7 @@ programa ::=
 /* --- Sección de Declaraciones --- */
 seccion_declaracion ::=
     DECLARE_SECTION lista_declaraciones ENDDECLARE_SECTION
-    | /* vacío si permites programas sin variables */
+    | /* vacío si es programa sin variables */
     ;
 
 lista_declaraciones ::=
@@ -50,19 +98,46 @@ lista_declaraciones ::=
     | declaracion
     ;
 
+// Asignacion  [a, b] ::= [INT, FLOAT]
 declaracion ::=
-    tipo_dato DOS_PUNTOS lista_variables
+    COR_A lista_variables COR_C ASIGNACION:asig COR_A lista_tipos COR_C
+    {:
+        if (tempVariables.size() != tempTipos.size()) {
+            registrarErrorSemantico(asigleft, "La cantidad de variables (" + tempVariables.size() +
+                                   ") no coincide con la cantidad de tipos (" + tempTipos.size() + ").");
+        } else {
+            for (int i = 0; i < tempVariables.size(); i++) {
+                String nombreVar = tempVariables.get(i);
+                String tipoVar = tempTipos.get(i);
+                // verificar existencia de variable
+
+                ts.agregar(nombreVar, tipoVar, "", 0);
+            }
+        }
+        // Limpiamos las listas temporales para la siguiente línea de declaración
+        tempVariables.clear();
+        tempTipos.clear();
+    :}
     ;
 
 lista_variables ::=
-    lista_variables COMA ID
-    | ID
+    lista_variables COMA ID:id
+    {: tempVariables.add(id); :}
+    | ID:id
+    {: tempVariables.add(id); :}
+    ;
+
+lista_tipos ::=
+    lista_tipos COMA tipo_dato:tipo
+    {: tempTipos.add(tipo); :}
+    | tipo_dato:tipo
+    {: tempTipos.add(tipo); :}
     ;
 
 tipo_dato ::=
-    INT
-    | FLOAT
-    | STRING
+    INT  {: RESULT = "INT"; :}
+    | FLOAT {: RESULT = "FLOAT"; :}
+    | STRING {: RESULT = "STRING"; :}
     ;
 
 /* --- Sección del Programa Principal --- */
@@ -101,13 +176,16 @@ bucle ::=
 
 /* Impresión por pantalla */
 salida_io ::=
-    WRITE PAR_A expresion PAR_C
+    WRITE CONST_STRING
+    | WRITE CONST_INT
+    | WRITE CONST_REAL
+    | WRITE ID
     ;
 
 /* Tema Especial Grupo 6: SETSWITCH */
 estructura_switch ::=
-    SETSWITCH PAR_A ID PAR_C lista_casos caso_defecto ENDSETCASE
-    | SETSWITCH PAR_A ID PAR_C lista_casos ENDSETCASE
+    SETSWITCH PAR_A expresion PAR_C lista_casos caso_defecto ENDSETCASE
+    | SETSWITCH PAR_A expresion PAR_C lista_casos ENDSETCASE
     ;
 
 lista_casos ::=
@@ -117,17 +195,16 @@ lista_casos ::=
 
 caso ::=
     CASE CONST_INT DOS_PUNTOS lista_sentencias
-    | CASE CONST_STRING DOS_PUNTOS lista_sentencias
     ;
 
 caso_defecto ::=
     ELSECASE DOS_PUNTOS lista_sentencias
     ;
 
-/* --- Expresiones Lógicas --- */
+/* --- Expresiones Lógicas un unico conector lógico--- */
 expresion_logica ::=
-    expresion_logica OP_AND condicion
-    | expresion_logica OP_OR condicion
+    condicion OP_AND condicion
+    | condicion OP_OR condicion
     | condicion
     ;
 
@@ -138,7 +215,7 @@ condicion ::=
     | expresion OP_MAYOR_IGUAL expresion
     | expresion OP_IGUAL expresion
     | expresion OP_DISTINTO expresion
-    | PAR_A expresion_logica PAR_C
+    | PAR_A expresion PAR_C
     ;
 
 /* --- Expresiones Aritméticas --- */
@@ -151,7 +228,6 @@ expresion ::=
 termino ::=
     termino OP_MULT factor
     | termino OP_DIV factor
-    | termino OP_RESTO factor
     | factor
     ;
 

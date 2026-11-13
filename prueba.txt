@@ -18,7 +18,7 @@ PROGRAM.SECTION
         a ::= a + 1
     ENDWHILE
 
-    IF (b >= 5.0) AND (a == 20)
+    IF ( a == 20)
         write "Fin del ciclo"
     ENDIF
 
