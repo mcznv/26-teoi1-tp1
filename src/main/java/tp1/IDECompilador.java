@@ -103,7 +103,7 @@ public class IDECompilador extends JFrame {
     }
 
     private void compilar() {
-        txtOutput.setText("Iniciando compilación...\n");
+        txtOutput.setText("Iniciando análisis léxico y sintáctico...\n\n");
         String codigo = txtInput.getText();
 
         if (codigo.trim().isEmpty()) {
@@ -114,13 +114,25 @@ public class IDECompilador extends JFrame {
         try {
             Lexico lexer = new Lexico(new StringReader(codigo));
             AnalizadorSintactico sintactico = new AnalizadorSintactico(lexer);
-            // Se comparte la tabla de símbolos
+            // Se comparte la tabla de símbolos entre el léxico y el sintáctico
             sintactico.ts = lexer.ts;
             sintactico.parse();
+
+            // 1. Mostrar las reglas sintácticas reconocidas (que ejecutaron acciones)
+            if (!sintactico.reglasReconocidas.isEmpty()) {
+                txtOutput.append("--- REGLAS SINTÁCTICAS RECONOCIDAS ---\n");
+                for (String regla : sintactico.reglasReconocidas) {
+                    txtOutput.append(regla + "\n");
+                }
+                txtOutput.append("\n");
+            }
+
+            // 2. Verificar y mostrar errores léxicos, sintácticos o semánticos
             boolean hayErrores = false;
 
             if (!lexer.erroresLexicos.isEmpty()) {
                 hayErrores = true;
+                txtOutput.append("--- ERRORES LÉXICOS ---\n");
                 for (String err : lexer.erroresLexicos) {
                     txtOutput.append(err + "\n");
                 }
@@ -128,17 +140,19 @@ public class IDECompilador extends JFrame {
 
             if (!sintactico.erroresSintacticos.isEmpty()) {
                 hayErrores = true;
+                txtOutput.append("--- ERRORES SINTÁCTICOS / SEMÁNTICOS ---\n");
                 for (String err : sintactico.erroresSintacticos) {
                     txtOutput.append(err + "\n");
                 }
             }
-            lexer.ts.guardarEnArchivo("ts.txt");
 
+            // 3. Exportar la Tabla de Símbolos a ts.txt
+            lexer.ts.guardarEnArchivo("ts.txt");
 
             if (hayErrores) {
                 txtOutput.append("\n[!] COMPILACIÓN FINALIZADA CON ERRORES. Revise los mensajes anteriores.\n");
             } else {
-                txtOutput.append("\n[OK] Compilación exitosa. Sintaxis correcta y Tabla de Símbolos generada en 'ts.txt'.\n");
+                txtOutput.append("[OK] Compilación exitosa. Sintaxis correcta y Tabla de Símbolos generada en 'ts.txt'.\n");
             }
 
         } catch (Exception ex) {

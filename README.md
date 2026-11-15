@@ -16,9 +16,10 @@
 ---
 
 ## Descripción del Proyecto
-Este repositorio contiene la **Primera Entrega** del Trabajo Práctico Integrador (Compilador). Consiste en un analizador léxico desarrollado con **JFlex** e integrado en una interfaz gráfica (IDE) construida con Java Swing.
 
-El analizador reconoce los tokens del lenguaje definido por la cátedra e incluye la implementación de nuestro tema especial asignado: **SETSWITCH**.
+Este repositorio contiene el desarrollo del Trabajo Práctico Integrador (Compilador) de la asignatura Teoría de la Computación I. Consiste en un compilador con análisis léxico, sintáctico y validaciones semánticas desarrollado utilizando JFlex y Java CUP, integrado dentro de un entorno gráfico interactivo (IDE) construido en Java Swing.
+
+El compilador reconoce todos los temas comunes definidos por la cátedra e implementa el tema especial asignado al Grupo 6: la estructura de selección múltiple SETSWITCH.
 
 ---
 
@@ -27,7 +28,7 @@ Este comando le indica a Maven que genere la clase `Lexico.java` utilizando JFle
 ```bash
 mvn clean package
 
-java -jar ./target/tp1-0.0.1-SNAPSHOT.jar
+java -jar ./target/tp1-0.0.2-SNAPSHOT.jar
 ```
 ###  Instrucciones de Uso
 Ejecutar la aplicación con el comando mencionado arriba.
@@ -36,6 +37,6 @@ Ir al menú superior Archivo > Abrir archivo... y seleccionar el archivo prueba.
 
 Presionar el botón Compilar (Análisis Léxico) ubicado en la parte inferior derecha.
 
-Los tokens reconocidos (y posibles errores) se listarán en la Consola de Salida.
+En el panel Consola de Salida se listarán todas las reglas sintácticas reconocidas por el parser o, en caso de existir, el detalle de los errores léxicos, sintácticos y semánticos encontrados con su número de línea.
 
-Al finalizar, la Tabla de Símbolos se exportará automáticamente actualizando el archivo ts.txt en el directorio del proyecto.
+Al finalizar el análisis, la Tabla de Símbolos se exportará automáticamente en el archivo ts.txt en la raíz del proyecto.

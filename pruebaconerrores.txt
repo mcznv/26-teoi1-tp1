@@ -1,0 +1,83 @@
+//*
+  Archivo de validacion de errores Léxicos, Sintácticos y Semánticos - Grupo 6
+  //* Comentario anidado de 1 nivel válido *//
+*//
+
+DECLARE.SECTION
+    //* Declaración válida para usar en las pruebas *//
+    [a, b, texto] ::= [INT, FLOAT, STRING]
+
+    //* ERROR SEMÁNTICO 1: Cantidad de variables (3) distinta a cantidad de tipos (2) *//
+    [x, y, z] ::= [INT, FLOAT]
+
+    //* ERROR SEMÁNTICO 2: Variable 'a' redeclarada *//
+    [a] ::= [FLOAT]
+ENDDECLARE.SECTION
+
+PROGRAM.SECTION
+
+    //* ERROR SEMÁNTICO 3: Asignación a una variable que no fue declarada *//
+    noDeclarada ::= 10
+
+    //* ERROR SEMÁNTICO 4: Incompatibilidad de tipos (String asignado a variable numérica INT) *//
+    a ::= "Texto invalido en entero"
+
+    //* ERROR SEMÁNTICO 5: Incompatibilidad de tipos (Número asignado a variable STRING) *//
+    texto ::= 500
+
+    //* ERROR SEMÁNTICO 6: Operación aritmética inválida utilizando un STRING *//
+    a ::= "Hola" + 5
+
+    //* ERROR SEMÁNTICO 7: Variable no declarada dentro de una sentencia WRITE *//
+    write varFantasma
+
+    //* ERROR SEMÁNTICO 8: SETSWITCH evaluando un STRING en lugar de expresión numérica *//
+    SETSWITCH (texto)
+    CASE 10:
+        a ::= 1
+    ELSECASE:
+        a ::= 0
+    ENDSETCASE
+
+    //* ===========================================================================
+      SECCIÓN DE ERRORES SINTÁCTICOS Y LÉXICOS (Descomentar de a uno para probar,
+      ya que cortan el árbol de análisis de JAVA CUP al ser detectados)
+    =========================================================================== *//
+
+    //* ERROR SINTÁCTICO 1: Más de un conector lógico en una condición (solo se permite 1 AND u OR) *//
+    //*
+    IF (a < 10 AND b > 1.5 OR a == 0)
+        write "Error de conectores"
+    ENDIF
+    *//
+
+    //* ERROR SINTÁCTICO 2: CASE con constante real en vez de entera y falta de dos puntos *//
+    //*
+    SETSWITCH (a + 1)
+    CASE 3.14
+        a ::= 2
+    ENDSETCASE
+    *//
+
+    //* ERROR SINTÁCTICO 3: Estructura IF sin su cierre ENDIF *//
+    //*
+    IF (a == 10)
+        a ::= 20
+    *//
+
+    //* ERROR LÉXICO 1: Constante entera fuera del rango de 16 bits (> 32767) *//
+    //*
+    a ::= 99999
+    *//
+
+    //* ERROR LÉXICO 2: Constante string que supera el máximo de 30 caracteres *//
+    //*
+    texto ::= "Esta cadena supera ampliamente los treinta caracteres"
+    *//
+
+    //* ERROR LÉXICO 3: Caracter inválido no perteneciente al alfabeto del lenguaje *//
+    //*
+    a ::= 10 @ 2
+    *//
+
+ENDPROGRAM.SECTION
