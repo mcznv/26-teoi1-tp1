@@ -62,7 +62,7 @@ terminal String CONST_STRING;
 
 /* --- NO TERMINALES --- */
 non terminal programa, seccion_declaracion, seccion_programa;
-non terminal lista_declaraciones, declaracion, lista_variables, lista_tipos;
+non terminal lista_declaraciones, declaracion, lista;
 non terminal String tipo_dato;
 non terminal lista_sentencias, sentencia;
 non terminal asignacion, condicional, bucle, salida_io, estructura_switch;
@@ -98,47 +98,49 @@ lista_declaraciones ::=
     ;
 
 declaracion ::=
-    COR_A lista_variables COR_C ASIGNACION:asig COR_A lista_tipos COR_C
+    COR_A ID:id lista tipo_dato:tipo COR_C
     {:
-        if (tempVariables.size() != tempTipos.size()) {
-            registrarErrorSemantico(asigleft, "La cantidad de variables (" + tempVariables.size() +
-                                   ") no coincide con la cantidad de tipos (" + tempTipos.size() + ").");
-        } else {
-            for (int i = 0; i < tempVariables.size(); i++) {
-                String nombreVar = tempVariables.get(i);
-                String tipoVar = tempTipos.get(i);
-                if (ts.existe(nombreVar)) {
-                    registrarErrorSemantico(asigleft, "La variable '" + nombreVar + "' ya fue declarada previamente.");
-                } else {
-                    ts.agregar(nombreVar, "ID", tipoVar, "", 0);
-                }
+        // Procesa el primer ID y ultimo tipo_dato
+        // por cada ID tipo_dato, guarda al inicio el ID y al final el tipo, respetando el orden
+        // estos son los ultimos, porque se apilaron desde la recursion central
+        // cuando se agoto la lista, entonces aqui va el for para agregar los elementos en la tabla de simbolos
+        tempVariables.add(0, id);
+        tempTipos.add(tipo);
+
+        for (int i = 0; i < tempVariables.size(); i++) {
+            String nombreVar = tempVariables.get(i);
+            String tipoVar = tempTipos.get(i);
+
+            if (ts.existe(nombreVar)) {
+                registrarErrorSemantico(idleft, "La variable '" + nombreVar + "' ya fue declarada previamente.");
+            } else {
+                ts.agregar(nombreVar, "ID", tipoVar, "", 0);
             }
-            registrarRegla("declaracion -> " + tempVariables + " ::= " + tempTipos);
         }
+        registrarRegla("declaracion -> " + tempVariables + " ::= " + tempTipos);
+
+        // Limpiamos las listas para la próxima declaración
         tempVariables.clear();
         tempTipos.clear();
     :}
     ;
 
-lista_variables ::=
-    lista_variables COMA ID:id
-    {: tempVariables.add(id); :}
-    | ID:id
-    {: tempVariables.add(id); :}
-    ;
-
-lista_tipos ::=
-    lista_tipos COMA tipo_dato:tipo
-    {: tempTipos.add(tipo); :}
-    | tipo_dato:tipo
-    {: tempTipos.add(tipo); :}
+lista ::=
+    COMA ID:id lista tipo_dato:tipo COMA
+    {:
+        // por cada ID tipo_dato, guarda al inicio el ID y al final el tipo, respetando el orden
+        tempVariables.add(0, id);
+        tempTipos.add(tipo);
+    :}
+    | COR_C ASIGNACION COR_A
     ;
 
 tipo_dato ::=
-    INT    {: RESULT = "Integer"; :}
+    INT      {: RESULT = "Integer"; :}
     | FLOAT  {: RESULT = "Float"; :}
     | STRING {: RESULT = "String"; :}
     ;
+
 
 /* --- Sección del Programa Principal --- */
 seccion_programa ::=
@@ -165,17 +167,31 @@ asignacion ::=
     {:
         if (!ts.existe(id)) {
             registrarErrorSemantico(idleft, "La variable '" + id + "' no fue declarada en DECLARE.SECTION.");
-        } else {
+        } else if (!"Error".equals(tipoExp)) {
             String tipoVar = ts.obtenerTipo(id);
-            if ("String".equals(tipoVar) && !"String".equals(tipoExp)) {
+            if ("String".equals(tipoVar)) {
                 registrarErrorSemantico(asigleft, "Incompatibilidad de tipos: la variable String '" + id + "' solo puede recibir una constante string.");
-            } else if (!"String".equals(tipoVar) && "String".equals(tipoExp)) {
-                registrarErrorSemantico(asigleft, "Incompatibilidad de tipos: no se puede asignar un String a la variable numérica '" + id + "'.");
+            } else if ("Integer".equals(tipoVar) && "Float".equals(tipoExp)) {
+
+                registrarErrorSemantico(asigleft, "Incompatibilidad de tipos: no se puede asignar un Float a la variable Integer '" + id + "'.");
             }
         }
         registrarRegla("asignacion -> " + id + " ::= expresion");
     :}
+    | ID:id ASIGNACION:asig CONST_STRING
+    {:
+        if (!ts.existe(id)) {
+            registrarErrorSemantico(idleft, "La variable '" + id + "' no fue declarada en DECLARE.SECTION.");
+        } else {
+            String tipoVar = ts.obtenerTipo(id);
+            if (!"String".equals(tipoVar)) {
+                registrarErrorSemantico(asigleft, "Incompatibilidad de tipos: no se puede asignar una constante String a la variable '" + id + "' (" + tipoVar + ").");
+            }
+        }
+        registrarRegla("asignacion -> " + id + " ::= CONST_STRING");
+    :}
     ;
+
 
 /* Estructura de Control IF */
 condicional ::=
@@ -263,8 +279,8 @@ condicion ::=
     {: registrarRegla("condicion -> expresion == expresion"); :}
     | expresion OP_DISTINTO expresion
     {: registrarRegla("condicion -> expresion != expresion"); :}
-    | PAR_A expresion PAR_C
     ;
+
 
 /* --- Expresiones Aritméticas --- */
 expresion ::=
@@ -321,18 +337,22 @@ factor ::=
     ID:id
     {:
         if (!ts.existe(id)) {
-            registrarErrorSemantico(idleft, "La variable '" + id + "' no fue declarada en DECLARE.SECTION.");
-            RESULT = "ERROR";
+            registrarErrorSemantico(idleft, "La variable '" + id + "' no fue declarada.");
+            RESULT = "Error";
         } else {
-            RESULT = ts.obtenerTipo(id);
+            String tipo = ts.obtenerTipo(id);
+            if ("String".equals(tipo)) {
+                registrarErrorSemantico(idleft, "La variable String '" + id + "' no puede formar parte de una expresión aritmética.");
+                RESULT = "Error";
+            } else {
+                RESULT = tipo; // Devuelve "Integer" o "Float"
+            }
         }
     :}
     | CONST_INT
     {: RESULT = "Integer"; :}
     | CONST_REAL
     {: RESULT = "Float"; :}
-    | CONST_STRING
-    {: RESULT = "String"; :}
     | PAR_A expresion:e PAR_C
     {: RESULT = e; :}
     ;
